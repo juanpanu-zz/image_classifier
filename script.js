@@ -6,22 +6,22 @@ const classifier = knnClassifier.create();
 const imgEl = document.getElementById("img");
 const descEl = document.getElementById("descripcion_imagen");
 var count = 0;
-var net ;
+var net;
 var webcam;
-async function app(){
-	console.log("Cargando modelo de identificacion de imagenes");
-  net= await mobilenet.load();
-	console.log("Carga terminada")
+async function app() {
+  console.log("Cargando modelo de identificacion de imagenes");
+  net = await mobilenet.load();
+  console.log("Carga terminada")
   //clasificamos la imagen de carga
-	const result = await net.classify(imgEl);
-	console.log(result);
-  descEl.innerHTML= JSON.stringify(result);
+  const result = await net.classify(imgEl);
+  console.log(result);
+  descEl.innerHTML = JSON.stringify(result);
 
 
 
 
   //obtenemos datos del webcam
-	webcam = await tf.data.webcam(webcamElement);
+  webcam = await tf.data.webcam(webcamElement);
   //y los vamos procesando
   while (true) {
     const img = await webcam.capture();
@@ -36,7 +36,7 @@ async function app(){
       result2 = {};
     }
 
-    const classes = ["Untrained", "Gato", "Dino" , "Alex", "OK","Rock"]
+    const classes = ["Untrained", "Cat", "Dino", "Toy", "OK", "Rock"]
 
     document.getElementById('console').innerText = `
       prediction: ${result[0].className}\n
@@ -49,7 +49,7 @@ async function app(){
     probability: ${result2.confidences[result2.label]}
     `;
     } catch (error) {
-      document.getElementById("console2").innerText="Untrained";
+      document.getElementById("console2").innerText = "Untrained";
     }
 
 
@@ -63,25 +63,25 @@ async function app(){
   }
 }
 
-img.onload =async function() {
+img.onload = async function () {
 
-   try {
-     result = await net.classify(img);
-     descEl.innerHTML= JSON.stringify(result);
-   } catch (error) {
+  try {
+    result = await net.classify(img);
+    descEl.innerHTML = JSON.stringify(result);
+  } catch (error) {
 
-   }
- }
-
-async function  cambiarImagen(){
-  count =count + 1;
-  imgEl.src="https://picsum.photos/200/300?random=" + count;
-  descEl.innerHTM = "";
   }
+}
+
+async function cambiarImagen() {
+  count = count + 1;
+  imgEl.src = "https://picsum.photos/200/300?random=" + count;
+  descEl.innerHTM = "";
+}
 
 
 //add example
-async function addExample (classId) {
+async function addExample(classId) {
   const img = await webcam.capture();
   const activation = net.infer(img, true);
   classifier.addExample(activation, classId);
@@ -90,18 +90,18 @@ async function addExample (classId) {
 }
 
 const saveKnn = async () => {
-    //obtenemos el dataset actual del clasificador (labels y vectores)
-    let strClassifier = JSON.stringify(Object.entries(classifier.getClassifierDataset()).map(([label, data]) => [label, Array.from(data.dataSync()), data.shape]));
-    const storageKey = "knnClassifier";
-    //lo almacenamos en el localStorage
-    localStorage.setItem(storageKey, strClassifier);
+  //obtenemos el dataset actual del clasificador (labels y vectores)
+  let strClassifier = JSON.stringify(Object.entries(classifier.getClassifierDataset()).map(([label, data]) => [label, Array.from(data.dataSync()), data.shape]));
+  const storageKey = "knnClassifier";
+  //lo almacenamos en el localStorage
+  localStorage.setItem(storageKey, strClassifier);
 };
 
 
-const loadKnn = async ()=>{
-    const storageKey = "knnClassifier";
-    let datasetJson = localStorage.getItem(storageKey);
-    classifier.setClassifierDataset(Object.fromEntries(JSON.parse(datasetJson).map(([label, data, shape]) => [label, tf.tensor(data, shape)])));
+const loadKnn = async () => {
+  const storageKey = "knnClassifier";
+  let datasetJson = localStorage.getItem(storageKey);
+  classifier.setClassifierDataset(Object.fromEntries(JSON.parse(datasetJson).map(([label, data, shape]) => [label, tf.tensor(data, shape)])));
 };
 
 
